@@ -1,3 +1,4 @@
 # AssetbundleTool
-Assetbundle managing Tool\n
+Assetbundle managing Tool
+
 Script file path : Assets - Editor
