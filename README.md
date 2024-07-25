@@ -3,4 +3,4 @@ Assetbundle managing Tool
 
 Script file path : Assets - Editor
 
-notion url : https://www.notion.so/Assetbundle-Tool-35b73f0a38494903929a55460777021b
+notion url : [https://www.notion.so/Assetbundle-Tool-35b73f0a38494903929a55460777021b](https://flower-seal-05a.notion.site/Assetbundle-Tool-35b73f0a38494903929a55460777021b)
