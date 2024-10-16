@@ -21,7 +21,6 @@ using Firebase.Auth;
 using static FirebaseStoreModel;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-//using orcamolo;
 using static CharnameDiirToEnum;
 
 public enum BuildTargetType
@@ -271,17 +270,9 @@ public class ModelUtilityEditor
     [Button(ButtonSizes.Large)]
     public void Download()
     {
-        //string firebasePath = $"gs://esper-molo.appspot.com/uploadUnity/{buildTargetType}/{FileNameToDownload}";
-        //string localPath = $"Assets/AssetBundles/{buildTargetType}/{FileNameToDownload}";
         string firebasePath = $"gs://esper-molo.appspot.com/uploadUnity/{buildTargetType}";
         string localPath = $"Assets/AssetBundles/{buildTargetType}";
         gsReference = storage.GetReferenceFromUrl(firebasePath);
-
-
-        /*gsReference.GetDownloadUrlAsync().ContinueWithOnMainThread(task => {
-            Debug.Log("Download URL: " + task.Result);
-            DownloadAssetBundle(firebasePath, localPath);
-        });*/
 
         gsReference.GetFileAsync(localPath).ContinueWithOnMainThread(task =>
         {
@@ -385,7 +376,6 @@ public class ModelUtilityEditor
     [Button(ButtonSizes.Large)]
     public void DebugButton()
     {
-        //GetCharidInDoc();
         GetFileNames();
     }
 
@@ -707,224 +697,6 @@ public class ModelUtilityEditor
         }
     }
 
-    /*public void CreateVenueCharAssetBundleModel(Task<StorageMetadata> task, string charIdinStorage)
-    {
-        if (!task.IsCompleted)
-        {
-            Debug.LogError("Task<StorageMetadata>가 아직 완료되지 않았습니다.");
-            return;
-        }
-        DocumentReference docRef = db.Collection("venueCharAssetBundle").Document();
-        var assetBundleModel = new VenueCharAssetBundleModel()
-        {
-            bundleId = docRef.Id,
-            charId = charIdinStorage, // VenueCharModel fire store에서 읽어오자
-            createdAt = DateTime.UtcNow,
-            osType = _osType,
-            unityVersion = Application.unityVersion,
-            modelVersion = _modelVersion,
-            bundleFile = GetBundleFileModelAsync().Result,
-            manifestFile = GetManifestFileModelAsync().Result,
-        };
-
-        try
-        {
-            // file 객체의 데이터를 딕셔너리에 저장하기 전에 type 필드를 문자열로 변환
-            var bundleFileData = new Dictionary<string, object>();
-            var bundleFileProperties = typeof(FbFileModel).GetProperties();
-            foreach (var fileProperty in bundleFileProperties)
-            {
-                if (fileProperty.Name == "type") // 열거형 필드 이름 확인
-                {
-                    // 열거형 값을 문자열로 변환하여 저장
-                    bundleFileData[fileProperty.Name] = assetBundleModel.bundleFile.type.ToString();
-                }
-                else
-                {
-                    // 그 외의 필드는 기존 로직대로 처리
-                    bundleFileData[fileProperty.Name] = fileProperty.GetValue(assetBundleModel.bundleFile);
-                }
-            }
-
-            var manifestFileData = new Dictionary<string, object>();
-            var manifestFileProperties = typeof(FbFileModel).GetProperties();
-            foreach (var fileProperty in manifestFileProperties)
-            {
-                if (fileProperty.Name == "type") // 열거형 필드 이름 확인
-                {
-                    // 열거형 값을 문자열로 변환하여 저장
-                    manifestFileData[fileProperty.Name] = assetBundleModel.manifestFile.type.ToString();
-                }
-                else
-                {
-                    // 그 외의 필드는 기존 로직대로 처리
-                    manifestFileData[fileProperty.Name] = fileProperty.GetValue(assetBundleModel.manifestFile);
-                }
-            }
-
-            var data = new Dictionary<string, object>();
-            var properties = typeof(VenueCharAssetBundleModel).GetProperties();
-            foreach (var property in properties)
-            {
-                if (property.Name == "bundleFile")
-                {
-                    // file 필드의 경우, 위에서 준비한 딕셔너리 사용
-                    data[property.Name] = bundleFileData;
-                    $"data[property.Name] bundlefile : {data[property.Name]}".DLog();
-                }
-                if (property.Name == "manifestFile")
-                {
-                    // file 필드의 경우, 위에서 준비한 딕셔너리 사용
-                    data[property.Name] = manifestFileData;
-                    $"data[property.Name] manifest : {data[property.Name]}".DLog();
-                }
-                else
-                {
-
-                    if (property.Name == "osType")
-                    {
-                        data[property.Name] = assetBundleModel.osType.ToString();
-                    }
-                    else data[property.Name] = property.GetValue(assetBundleModel);
-                }
-            }
-            foreach (var item in data)
-            {
-                Debug.Log($"Key: {item.Key}, Value: {item.Value}");
-            }
-            docRef.SetAsync(data);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("AssetBundle 문서 설정 오류: " + e.Message);
-        }
-    }*/
-    /*public void CreateVenueCharAssetBundleModel(Task<StorageMetadata> task, string charIdinStorage)
-    {
-        if (!task.IsCompleted)
-        {
-            Debug.LogError("Task<StorageMetadata>가 아직 완료되지 않았습니다.");
-            return;
-        }
-        DocumentReference docRef = db.Collection("venueCharAssetBundle").Document();
-        var assetBundleModel = new VenueCharAssetBundleModel()
-        {
-            bundleId = docRef.Id,
-            charId = charIdinStorage, // VenueCharModel fire store에서 읽어오자
-            createdAt = DateTime.UtcNow,
-            osType = _osType,
-            unityVersion = Application.unityVersion,
-            modelVersion = _modelVersion,
-            file = new FbFileModel()
-            {
-                url = task.Result.Reference.GetDownloadUrlAsync().Result.AbsoluteUri,
-                fullPath = task.Result.Path,
-                createdAt = task.Result.CreationTimeMillis,
-                updatedAt = task.Result.UpdatedTimeMillis,
-                filename = task.Result.Name,
-                id = GenDocId(),
-                refCount = 999,
-                uploaderUid = GetUploaderUid(),
-                type = FbFileType.file,
-            }
-        };
-        
-        //에러나는 부분
-        try
-        {
-            {
-                var fileData = new Dictionary<string, object>();
-                var fileProperties = assetBundleModel.file.GetType().GetProperties();
-                foreach (var fileProperty in fileProperties)
-                {
-                    if (fileProperty.Name == "type") // 열거형 필드 이름 확인
-                    {
-                        // 열거형 값을 문자열로 변환하여 저장
-                        fileData[fileProperty.Name] = assetBundleModel.file.type.ToString();
-                    }
-                    else
-                    {
-                        // 그 외의 필드는 기존 로직대로 처리
-                        fileData[fileProperty.Name] = fileProperty.GetValue(assetBundleModel.file);
-                    }
-                }
-            }
-            var data = new Dictionary<string, object>();
-            var properties = assetBundleModel.GetType().GetProperties();
-            foreach (var property in properties)
-            {
-                if (property.Name == "file")
-                {
-                    // file 필드의 경우, 위에서 준비한 딕셔너리 사용
-                    data[property.Name] = fileData;
-                }
-                if (property.PropertyType.IsEnum)
-                {
-                    // Enum 속성의 값을 문자열로 변환하여 저장
-                    var enumValue = property.GetValue(assetBundleModel);
-                    var stringValue = JsonConvert.SerializeObject(enumValue, new EnumStringConverter());
-                    $"convert value : {stringValue}".DLog();
-                    data[property.Name] = stringValue;
-                }
-                else
-                {
-                    // Enum이 아닌 다른 속성은 그대로 저장
-                    data[property.Name] = property.GetValue(assetBundleModel);
-                }
-            }
-            docRef.SetAsync(data);
-            foreach (var item in data)
-            {
-                Debug.Log($"Key: {item.Key}, Value: {item.Value}");
-            }
-            //Debug.Log("AssetBundle 문서 생성");
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("AssetBundle 문서 설정 오류: " + e.Message);
-        }
-    }
-
-    public static string ConvertEnumToString(object enumValue)
-    {
-        if (enumValue == null)
-        {
-            return null;
-        }
-
-        var enumType = enumValue.GetType();
-        if (!enumType.IsEnum)
-        {
-            return enumValue.ToString();
-        }
-
-        var enumName = Enum.GetName(enumType, enumValue);
-        if (string.IsNullOrEmpty(enumName))
-        {
-            return null;
-        }
-
-        return enumName;
-    }
-
-    /*public VenueCharModel CreateVenueCharModel(Task<StorageMetadata> task, string docName)
-    {
-        DocumentReference docRef = db.Collection("venueChar").Document(docName);
-        var charModel = new VenueCharModel()
-        {
-            charId = docRef.Id,
-            displayName = docName,
-            visible = true,
-            cost = 0,
-            createdAt = task.Result.UpdatedTimeMillis,
-            groupId = ExtractGroupId(docName),
-        };
-        docRef.SetAsync(charModel);
-        Debug.Log("Create charmodel doc");
-        return charModel;
-    }*/
-
-
 
     private bool FillterBuildTargetTypeString(string fileName)
     {
@@ -990,8 +762,6 @@ public class TextureUtilityEditor
     [Button(ButtonSizes.Large)]
     public void UpLoad()
     {
-        //BuildPipeline.BuildAssetBundles("Assets/AssetBundles/", BuildAssetBundleOptions.None, buildTarget);
-
         string[] assetBundles = AssetDatabase.GetAllAssetBundleNames();
         foreach (string bundleName in assetBundles)
         {
@@ -1028,7 +798,7 @@ public class TextureUtilityEditor
 
 
 
-public static class Nyang
+public static class Logger
 {
     public static void DLog(this string s)
     {
